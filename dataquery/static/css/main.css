@@ -1,0 +1,28 @@
+body, html {width: 100%;height: 100%;margin:0;}
+*{margin:0px;padding:0px;border:0px;}
+.search-well {padding: 10px 10px 0px 10px;}
+.nav-stacked > li > a{color: #4F4F4F;}
+.nav-pills > .active > a, .nav-pills > .active > a:hover, .nav-pills > .active > a:focus {
+    background-color: #eee;
+    color: #4F4F4F;
+}
+.tables-list{background: #f9f9f9;}
+
+
+.navbar .brand {
+    padding: 15px 20px;
+}
+.navbar .nav > li > a {
+    padding: 15px 18px;
+}
+.navbar .nav-user > li > a {
+    padding: 15px 15px;
+}
+.navbar-inner {
+    border-radius: 0px;
+}
+
+.input-ip {width: 108px;}
+.input-port {width: 30px;}
+.input-path {width: 388px;}
+.form-horizontal input + .help-block, .form-horizontal select + .help-block, .form-horizontal textarea + .help-block, .form-horizontal .uneditable-input + .help-block, .form-horizontal .input-prepend + .help-block, .form-horizontal .input-append + .help-block { margin-top: 2px; margin-bottom:2px;}

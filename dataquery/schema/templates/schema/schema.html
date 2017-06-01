@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load format_data %}
+
+{% block title %}表结构{% endblock %}
+
+
+{% block content %}
+<div class="row-fluid">
+  <div class="span3">
+    <form class="form-inline" role="form" id="db-form">
+    <select name="dbid" id="id_db" style="width:100%;">
+      {% for d in dbs %}
+        <option {% if dbid == d.0 %}selected="selected"{% endif %} value="{{ d.0 }}">{{ d.1 }}</option>
+      {% endfor %}
+    </select>
+    </form>
+
+   <div class="tables-list">
+    <ul class="nav nav-pills nav-stacked">
+      {% for t in tables %}
+      <li{% if t == table_name %} class="active"{% endif %}>
+          <a href="{% url 'schema' %}?dbid={{ dbid }}&table={{ t }}"><i class="fa fa-table"></i> {{ t }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+   </div>
+  </div>
+
+  <div class="span9">
+    <div id="resulttabContent" class="tab-content">
+      <div class="row-fluid">
+        <div class="span12">
+          <div>
+          {% if columns_count %}
+            <legend>&lt;&lt; {{ table_name }} &gt;&gt; 共有({{ columns_count }})个字段</legend>
+            <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                {% for key in keys %}
+                  <th>{{ key }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in data %}
+                <tr>
+                  {% for i in d %}
+                    <td>{{ i|format_data }}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+            </table>
+          {% else %}
+            <legend>表字段</legend>
+          {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+
+$(document).ready(function() {
+  $("#id_db").select2();
+  $("#id_db").change(function(){
+      $("#db-form").submit();
+  });
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr> <th>数据库</th> <th>表名</th> </tr>
+  </thead>
+  <tbody>
+  {% for k, v in tables.items %}
+    <tr>
+      <td>{{ k.db.name }} <a class="text-error delete-ico icon-remove" title="删除" href="#" data-url="{% url 'permission_del' u.id %}?dbpid={{ k.pk }}"></a></td>
+      <td>
+        {% if k.have_secret_columns %}
+          加密字段查看权限 <a class="text-error delete-ico icon-remove" title="删除" href="#" data-url="{% url 'permission_del' u.id %}?have_secret_columns=1&dbpid={{ k.pk }}"></a> |
+        {% endif %}
+        {% if k.have_all %}
+          整个数据库权限 <a class="text-error delete-ico icon-remove" title="删除" href="#" data-url="{% url 'permission_del' u.id %}?table_name=__have_all__&dbpid={{ k.pk }}"></a> |
+        {% endif %}
+        {% for t in v %}
+          {% if t != '__have_all__' %}
+            {{ t }} <a class="text-error delete-ico icon-remove" title="删除" href="#" data-url="{% url 'permission_del' u.id %}?table_name={{ t }}&dbpid={{ k.pk }}"></a> |
+          {% endif %}
+        {% endfor %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h4>添加权限</h4>
+<hr>
+<form id="perm-form" action="." method="post" class="form-horizontal">{% csrf_token %}
+    <div class="control-group">
+        <label class="control-label mylabel">数据库</label>
+        <div class="controls">
+            <select required="" placeholder="数据库" name="db" id="id_db">
+                {% for db in dbs %}
+                <option value="{{ db.0 }}">{{ db.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label mylabel"> 拥有整个数据库权限</label>
+        <div class="controls">
+            <label class="checkbox"> <input type="checkbox" name="have_all"> </label>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label mylabel"> 拥有查看加密字段权限</label>
+        <div class="controls">
+            <label class="checkbox"> <input type="checkbox" name="have_secret_columns"> </label>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label mylabel">表名</label>
+        <div class="controls">
+            <select name="tables" id="id_tables" multiple="multiple" placeholder="表名">
+            </select>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <div class="controls">
+        <button type="submit" class="btn btn-primary">提交</button>
+        </div>
+    </div>
+</form>
+
+<script>
+function get_tables(){
+    $.ajax({
+        url: '{% url 'table_list' %}?dbid='+$("#id_db").val(),
+        type: "GET",
+        success: function(data){
+            if (data.success){
+                var html = '';
+                for (var i=0;i<data.data.length;i++){
+                    html += '<option value="'+data.data[i]+'">'+data.data[i]+'</option>';
+                }
+                $("#id_tables").html(html);
+                $("#id_tables").select2({ placeholder: "选择表名", })
+            }else{
+                iAlert("操作失败! "+ data['msg']);
+            }
+        }
+    });
+
+}
+
+$(document).ready(function() {
+    $("#id_db").select2({ placeholder: "选择数据库", });
+    $("#id_tables").select2({ placeholder: "选择表名", });
+
+    get_tables();
+    $("#id_db").change(get_tables);
+
+    $("#perm-form").submit(function(e){
+        e.preventDefault();
+        $.ajax({
+            url: '{% url 'permission_add' u.id %}',
+            type: "POST",
+            data: $("#perm-form").serialize(),
+            success: function(data){
+                if (data.success){
+                    iAlert("添加成功! ");
+                    setTimeout("location.reload();", 1000);
+                }else{
+                    iAlert("操作失败! "+ data['msg']);
+                }
+            }
+        });
+        $("#iconfirm-modal").hide();
+    });
+    $(".icon-remove").click(function(e){
+        e.preventDefault();
+        var url = $(this).attr('data-url');
+        var c = getCookie('csrftoken');
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {'csrfmiddlewaretoken': c},
+            success: function(data){
+                if (data.success){
+                    iAlert("操作成功! ");
+                    setTimeout("location.reload();", 1000);
+                }else{
+                    iAlert("操作失败! "+ data['msg']);
+                }
+            }
+        });
+        $("#iconfirm-modal").hide();
+    });
+
+
+});
+</script>

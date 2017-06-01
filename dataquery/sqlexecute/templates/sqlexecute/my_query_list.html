@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}查询列表{% endblock %}
+
+{% block css %}
+<link href="{% static 'google-code-prettify/prettify.css' %}" type="text/css" rel="stylesheet" />
+<style type="text/css">
+.lang-sql {cursor:pointer;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row-fluid">
+  <div class="span12">
+      <div class="well">
+      <legend>查询列表： </legend>
+
+      {% include "pagination.html" %}
+
+      <table class="table table-striped table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>#</th> <th>数据库名</th> <th>状态</th> <th>申请理由</th> <th>操作时间</th> <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in execlogs %}
+          <tr>
+            <td>{{ log.id }}</td>
+            <td>{{ log.db.db_name }}@{{ log.db.ip }}</td>
+            <td>
+                <span {% if log.status == 1 or log.status == 4 %}class='text-success'{% elif log.status == 3 %}class="text-error"{% endif %}>
+                {% if log.status == 6 or log.status == 7 or log.status == 8 %}
+                  {% if log.is_exec %}
+                    执行结束
+                  {% else %}
+                    {{ log.get_status_display }}
+                  {% endif %}
+                {% else %}
+                    {{ log.get_status_display }}
+                {% endif %}
+                </span>
+            </td>
+            <td>
+                <a class="mypopover" data-trigger="hover" data-content="{{ log.reason }}" data-toggle="popover" data-placement="left" data-original-title="理由">{{ log.reason|truncatechars:10 }}</a>
+            </td>
+            <td>
+                提交:<small>{{ log.create_time|date:"y-m-d H:i" }}</small><br>
+                审核:<small>{{ log.censor_time|date:"y-m-d H:i" }}{% if log.censor %}({{ log.censor.first_name }}){% endif %}</small>
+            </td>
+            <td>
+            {# 显示条件：未执行，状态审核通过 #}
+            {% if not log.is_exec %}
+              {% if log.status == 2 %}
+                请找DBA审核
+                {# <a href="#" data-url="{% url 'result' log.id %}" class="exec-btn btn btn-mini btn-success">执行</a> #}
+              {% endif %}
+            {% else %}
+              {% if log.status == 7 or log.status == 6 or log.status == 4 %}
+                {# <a href="#" data-url="{% url 'get_job' %}?download=1&id={{ log.pk }}&jobid={{ log.jobid }}" class="download-btn btn btn-mini btn-success">导出CSV</a> #}
+                {# <a href="#" data-url="{% url 'get_job' %}?download=1&is_excel=1&id={{ log.pk }}&jobid={{ log.jobid }}" class="download-btn btn btn-mini btn-success">导出EXCEL</a> #}
+                <a href="/static/excel/{{ log.jobid }}.xlsx" target="blank" class="btn btn-mini btn-success">导出EXCEL</a>
+              {% elif log.status == 2 %}
+                请找DBA审核
+              {% endif %}
+            {% endif %}
+                {# <a data-url="{% url 'censor_delete' log.id %}?" class="del_record btn btn-mini btn-danger">删除</a> #}
+             </td>
+          </tr>
+          <tr>
+            <td>SQL：</td>
+            <td colspan=8><pre class="prettyprint lang-sql" data-sql="{{ log.sql }}">{{ log.sql|truncatechars:280 }}</pre></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      </table>
+
+      {% include "pagination.html" %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript" src="{% static 'google-code-prettify/prettify.js' %}"></script>
+<script type="text/javascript" src="{% static 'google-code-prettify/lang-sql.js' %}"></script>
+<script>
+
+function del_record(){
+    var url = $("#post-info").attr("data-url");
+    var c = getCookie('csrftoken');
+    $.ajax({
+        url: url,
+        dataType: "json",
+        data: {'csrfmiddlewaretoken': c},
+        type: "POST",
+        success: function(data){
+            if (data.success){
+                iAlert("操作成功!");
+                setTimeout("location.reload();", 1000);
+            }else{
+                iAlert("操作失败! "+ data['msg']);
+            }
+        },
+        error: function(xhr){
+            if (xhr.status==404){
+                iAlert("该记录不存在或被删除!");
+            }else if(xhr.status == 403){
+                iAlert("没有权限!");
+            }else if(xhr.status == 500){
+                iAlert("系统错误!");
+            }
+        }
+    });
+}
+
+$(document).ready(function() {
+    window.prettyPrint && prettyPrint();
+    $("a[data-toggle=popover]").popover().hover(function(e) {
+        e.preventDefault();
+        window.prettyPrint && prettyPrint();
+    });
+    $(".lang-sql").click(function(){
+        iConfirm({
+              title: "SQL详情",
+              html: '<pre class="prettyprint lang-sql">' + $(this).attr('data-sql') + '</pre>',
+              show_footer: true,
+        });
+        window.prettyPrint && prettyPrint();
+
+    });
+    $(".del_record").click(function(e){
+        var url = $(this).attr("data-url");
+        iConfirm({
+              title: "是否删除",
+              html: '确定删除这条记录吗？<br><a style="visibility:hidden;" data-url="'+url+'" id="post-info">',
+              show_footer: true,
+              confirm_cb: del_record,
+        });
+    });
+
+    // 导出数据
+    $('.download-btn').click(function() {
+
+        $(this).parent().remove();
+        var url = $(this).attr("data-url");
+        window.location.href = url
+        return false;
+    });
+    $('.exec-btn').click(function() {
+
+        $(this).remove();
+        var url = $(this).attr("data-url");
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "GET",
+            success: function(data){
+                if (data.success){
+                    iAlert("操作成功!");
+                    setTimeout("location.reload();", 1000);
+                }else{
+                    iAlert("操作失败! "+ data['msg']);
+                }
+            },
+            error: function(xhr){
+                if (xhr.status==404){
+                    iAlert("该记录不存在或被删除!");
+                }else if(xhr.status == 403){
+                    iAlert("没有权限!");
+                }else if(xhr.status == 500){
+                    iAlert("系统错误!");
+                }
+            }
+        });
+
+        return false;
+    });
+
+
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+<div class="pagination" style="display:none;">
+    <ul>
+        {#<li><a class="page_id" data-pageid="{{ page|add:"-1" }}" href="javascript:void(0)">上一页</a></li>#}
+        {#<li class="disabled"><a href="javascript:void(0)">上一页</a></li>#}
+
+      {% for pg in page_range %}
+        <li id="page{{ pg }}"><a class="page_id" data-pageid="{{ pg }}" href="javascript:void(0)">{{ pg }}</a></li>
+      {% endfor %}
+
+
+      {#<li><a class="page_id" data-pageid="{{ page|add:"1" }}" href="javascript:void(0)">下一页</a></li>#}
+      {# <li class="disabled"><a href="javascript:void(0)">下一页</a></li>#}
+    </ul>
+</div>

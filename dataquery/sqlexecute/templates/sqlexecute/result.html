@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}执行结果{% endblock %}
+
+{% block css %}
+<style type="text/css">
+table td{font-size: 12px;white-space:nowrap;}
+.navbar { margin-bottom: 0; }
+.container-fluid { padding-left: 0; padding-right: 0; }
+.well { border: 0px; box-shadow: 0; margin-bottom: 0px; padding: 16px; padding-right: 26px; }
+.nav-stacked{margin-top: 28px;}
+</style>
+{% endblock %}
+
+
+{% block content %}
+  {% if r %}
+    <div class="well" style="background-color: #ffffff;box-shadow:0px;padding-left: 28px;padding-right:28px;">
+    <legend>执行结果</legend>
+    <ul class="nav nav-tabs" id="resulttab">
+        {% for d in r %}
+          <li{% if forloop.first %} class="active"{% endif %}><a data-toggle="tab" href="#tab{{ forloop.counter }}">{{ forloop.counter }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <div id="resulttabContent" class="tab-content">
+      {% for d in r %}
+      <div id="tab{{ forloop.counter }}" class="tab-pane fade{% if forloop.first %} active in{% endif %}">
+        <div class="row-fluid">
+          <div class="span12">
+            {% if d.error %}
+              <h3 class="text-error">{{ d.error }}</h3>
+            {% else %}
+              {% if d.is_select %}
+                <legend><span class="text-success">执行成功</span> 共有({{ d.count }})条(耗时{{ d.time|floatformat:2 }}ms)</legend>
+                <table class="table table-striped table-bordered table-condensed">
+                  <thead>
+                    <tr>
+                      {% for key in d.keys %}
+                        <th>{{ key }}</th>
+                      {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {% if d.keys %}
+                    {% for d in d.data %}
+                      <tr>
+                        {% for i in d %}
+                          <td>{{ i }}</td>
+                        {% endfor %}
+                      </tr>
+                    {% endfor %}
+                  {% endif %}
+                  </tbody>
+                </table>
+              {% else %}
+                <legend>共影响({{ d.count }})条</legend>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+   </div>
+  {% endif %}
+  </div>
+</div>
+
+{% endblock %}

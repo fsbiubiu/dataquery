@@ -1,0 +1,18 @@
+# 编译java脚本
+cd /opt/web/dataquery/dataquery/lib/sqlparser/
+javac -cp .:./py4j0.10.4.jar:./druid-1.0.27-SNAPSHOT.jar:$CLASSPATH SQLParser.java
+
+# java -cp .:./py4j0.10.4.jar:./druid-1.0.27-SNAPSHOT.jar:$CLASSPATH SQLParser
+
+
+# 同步数据库
+workon dataquery
+cd /opt/web/dataquery/dataquery
+python manage.py makemigrations
+python manage.py migrate
+
+
+# 重启服务
+supervisorclt
+restart dataquery_sqlparser
+restart dataquery_web

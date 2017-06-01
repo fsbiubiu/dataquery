@@ -1,0 +1,57 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="title" content="运维平台">
+        <meta name="description" content="运维平台">
+        <meta name="keywords" content="运维,监控,数据">
+        <title>登录 - 数据库查询平台</title>
+
+        <link href="{% static 'css/bootstrap-combined.min.css' %}" rel="stylesheet">
+        <link href="{% static 'css/login.css' %}" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="center-container">
+            <div class="center-block">
+                <h1>数据库查询平台</h1>
+                <br>
+                {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        用户名或密码错误
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        申请账号登陆  <a href="{% url 'user_password_reset' %}">忘记密码</a>
+                    </div>
+                {% endif %}
+                <form action="" method="POST" class="form-horizontal">{% csrf_token %}
+                    {% for field in form %}
+                    <div class="control-group{% if field.errors %} error{% endif %}">
+                        <div class="col-xs-12">
+                            {{ field }}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <input type="hidden" name="next" value="{{ next }}" />
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">登录</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </body>
+</html>

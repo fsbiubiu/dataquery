@@ -1,0 +1,33 @@
+{% load get_range %}
+
+{% if paginator.num_pages > 1 %}
+<div class="pagination">
+    <ul>
+      {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}&{{ queries.urlencode }}">上一页</a></li>
+      {% else %}
+        <li class="disabled"><a href="#">上一页</a></li>
+      {% endif %}
+
+      {% for pg in page_obj.number|get_range:-5 %}
+        {% if pg > 0 %}
+          <li><a href="?page={{ pg }}&{{ queries.urlencode }}">{{ pg }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      <li class="active"><a href="?page={{ page_obj.number }}&{{ queries.urlencode }}">{{ page_obj.number }}</a></li>
+
+      {% for pg in page_obj.number|get_range:6 %}
+        {% if pg <= paginator.num_pages %}
+          <li><a href="?page={{ pg }}&{{ queries.urlencode }}">{{ pg }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}&{{ queries.urlencode }}">下一页</a></li>
+      {% else %}
+        <li class="disabled"><a href="#">下一页</a></li>
+      {% endif %}
+    </ul>
+</div>
+{% endif %}

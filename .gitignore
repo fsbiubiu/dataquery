@@ -1,0 +1,16 @@
+# project
+#
+dev.py
+local.py
+0*.py
+db.sqlite3
+*.xlsx
+
+# OSX
+#
+.DS_Store
+
+# python
+#
+*.pyc
+*.pyo

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}加密字段列表{% endblock %}
+
+{% block content %}
+
+<legend>添加加密字段</legend>
+<div class="row-fluid">
+  <div class="span12">
+    <div class="well">
+      <form id="perm-form" action="." method="post" class="form-horizontal">{% csrf_token %}
+          <div class="control-group">
+              <label class="control-label mylabel">数据库</label>
+              <div class="controls">
+                  <select required="" placeholder="数据库" name="db" id="id_db">
+                      {% for db in dbs %}
+                      <option value="{{ db.0 }}">{{ db.1 }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+          </div>
+      
+          <div class="control-group">
+              <label class="control-label mylabel">表名</label>
+              <div class="controls">
+                  <select name="table_name" id="id_tables" placeholder="表名">
+                  </select>
+              </div>
+          </div>
+          <div class="control-group">
+              <label class="control-label mylabel">列名</label>
+              <div class="controls">
+                  <select name="columns" id="id_columns" multiple="multiple" placeholder="列名">
+                  </select>
+              </div>
+          </div>
+      
+          <div class="control-group">
+              <div class="controls">
+                  <button type="submit" class="btn btn-primary">提交</button>
+              </div>
+          </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+function get_tables(){
+    $.ajax({
+        url: '{% url 'table_list' %}?dbid='+$("#id_db").val(),
+        type: "GET",
+        success: function(data){
+            if (data.success){
+                var html = '';
+                for (var i=0;i<data.data.length;i++){
+                    html += '<option value="'+data.data[i]+'">'+data.data[i]+'</option>';
+                }
+                $("#id_tables").html(html);
+                $("#id_tables").select2({ placeholder: "选择表名", })
+
+                get_columns();
+            }else{
+                iAlert("操作失败! "+ data['msg']);
+            }
+        }
+    });
+}
+function get_columns(){
+    $.ajax({
+        url: '{% url 'columns_list' %}?dbid='+$("#id_db").val()+'&table_name='+$("#id_tables").val(),
+        type: "GET",
+        success: function(data){
+            if (data.success){
+                var html = '';
+                for (var i=0;i<data.data.length;i++){
+                    html += '<option value="'+data.data[i]+'">'+data.data[i]+'</option>';
+                }
+                $("#id_columns").html(html);
+                $("#id_columns").select2({ placeholder: "选择列名", })
+            }else{
+                iAlert("操作失败! "+ data['msg']);
+            }
+        }
+    });
+
+}
+
+
+$(document).ready(function() {
+    $("#id_db").select2({ placeholder: "选择数据库", });
+    $("#id_tables").select2({ placeholder: "选择表名", });
+    $("#id_columns").select2({ placeholder: "选择列名", });
+
+    get_tables();
+    $("#id_db").change(get_tables);
+    $("#id_tables").change(get_columns);
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <title>{% block title %}{% endblock %}--数据库查询平台</title>
+    <link href="{% static 'css/bootstrap-combined.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="{% static 'css/font-awesome.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'select2/css/select2.min.css' %}">
+    {% block css %}{% endblock %}
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}" ></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}" ></script>
+    <script src="{% static 'select2/js/select2.full.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}" ></script>
+</head>
+
+<body>
+<!-- Navbar -->
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+            </a>
+            <a class="brand" href="#">数据查询平台</a>
+            <ul class="nav">
+                <li{% if '/' == request.path %} class="active"{% endif %}><a href="/">首页</a></li>
+
+                <li class="dropdown{% if 'query' in request.path %} active{% endif %}">
+                  <a data-toggle="dropdown" class="dropdown-toggle" role="button" href="#" id="drop1">查询数据 <b class="caret"></b></a>
+                  <ul aria-labelledby="drop1" role="menu" class="dropdown-menu">
+                    <li role="presentation"><a href="{% url 'query' %}" tabindex="-1" role="menuitem">普通查询(最多500条)</a></li>
+                    <li role="presentation"><a href="{% url 'query_censor' %}" tabindex="-1" role="menuitem">数据导出(无限制)</a></li>
+                    <li class="divider" role="presentation"></li>
+                    <li role="presentation"><a href="{% url 'my_censor_log_list' %}" tabindex="-1" role="menuitem">查询历史</a></li>
+                  </ul>
+                </li>
+                <li{% if 'schema' in request.path %} class="active"{% endif %}><a href="{% url 'schema' %}">表结构</a></li>
+                <li class="divider-vertical"></li>
+                
+                {% if user.is_superuser %}
+                <li{% if 'db_conf' in request.path %} class="active"{% endif %}><a href="{% url 'db_list' %}">数据库设置</a></li>
+                <li{% if 'accounts' in request.path and 'department' not in request.path %} class="active"{% endif %}><a href="{% url 'user_list' %}">用户设置</a></li>
+                <li{% if 'department' in request.path %} class="active"{% endif %}><a href="{% url 'department_list' %}">部门设置</a></li>
+                <li{% if 'columns' in request.path %} class="active"{% endif %}><a href="{% url 'columns_permission_list' %}">加密字段</a></li>
+                <li{% if 'censor_log_list' in request.path %} class="active"{% endif %}><a href="{% url 'censor_log_list' %}">审核查询列表</a></li>
+                {% endif %}
+
+            </ul>
+            <ul class="nav-user nav pull-right">
+                <li> <a href="#">{{ user.username }}</a> </li>
+                <li> <a href="{% url 'user_change_password' %}">修改密码</a> </li>
+                <li> <a href="{% url 'logout' %}">退出</a> </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+  <!-- start content -->
+  <div class="container-fluid">
+      {% block content %}{% endblock %}
+  </div>
+</div>
+
+<!-- iConfirm 内容 -->
+<div class="modal hide fade" id="iconfirm-modal" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">&nbsp;</h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" id="iconfirm-cancel" data-dismiss="modal" class="btn btn-default">取消</button>
+                <button type="button" id="iconfirm-confirm" data-dismiss="modal" class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end iConfirm -->
+
+<!-- iAlter 内容 -->
+<div class="modal hide fade" id="ialert-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body"></div>
+            <!-- <div class="modal-footer"></div> -->
+        </div>
+    </div>
+</div>
+<!-- end iAlter -->
+
+
+    {% block script %}{% endblock %}
+</body>
+</html>

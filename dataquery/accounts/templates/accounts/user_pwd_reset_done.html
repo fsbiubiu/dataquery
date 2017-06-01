@@ -1,0 +1,26 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="title" content="运维平台">
+        <meta name="description" content="运维平台">
+        <meta name="keywords" content="运维,监控,数据">
+        <title>重置密码 - 数据库查询平台</title>
+
+        <link href="{% static 'css/bootstrap-combined.min.css' %}" rel="stylesheet">
+        <link href="{% static 'css/login.css' %}" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="center-container">
+            <div class="center-block">
+                <h3>重置密码成功</h3>
+                <br>
+                <a id="pwd-btn" href="{% url 'login' %}" class="btn ">登录</a>
+            </div>
+        </div>
+    </body>
+</html>

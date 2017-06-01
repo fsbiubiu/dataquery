@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}首页{% endblock %}
+
+{% block content %}
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="alert">
+                你好，{{ user.first_name }}，你拥有的查询权限:
+              {% if user.is_superuser %}
+                <br>
+                <br>
+                <h4>您是超级管理员，拥有所有查询权限</h4>
+              {% endif %}
+            </div>
+          {% if not user.is_superuser %}
+            <table class="table table-striped table-bordered table-hover">
+              <thead>
+                <tr> <th>数据库</th> <th>表名</th> </tr>
+              </thead>
+              <tbody>
+              {% for k, v in permission.items %}
+                <tr>
+                  <td>{{ k.db.name }} </td>
+                  <td>
+                    {% for t in v %}
+                      {% if t == '__have_all__' %}
+                        整个数据库 |
+                      {% else %}
+                        {{ t }} |
+                      {% endif %}
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

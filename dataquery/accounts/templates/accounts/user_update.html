@@ -1,0 +1,46 @@
+<form class="form-horizontal" id="update-form" action="." method="post">{% csrf_token %}
+
+    {% for field in form %}
+    <div class="control-group{% if field.errors %} error{% endif %}">
+        <label class="control-label mylabel">{{ field.label }}：</label>
+        <div class="controls">
+            {{ field }}
+            <span class="help-block">
+                <span class="{% if field.errors %} error{% endif %}">
+                  {% for error in field.errors %}
+                    {{ error }}
+                  {% endfor %}
+                    {{ field.help_text }}
+                </span>
+            </span>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="control-group">
+      <div class="controls">
+        <button type="submit" class="btn btn-primary">提交</button>
+      </div>
+    </div>
+</form>
+<script>
+$(function () {
+    $("#update-form").submit(function(e){
+        e.preventDefault();
+        $.ajax({
+            url: '{% url 'user_update' form.instance.pk %}',
+            type: "POST",
+            data: $("#update-form").serialize(),
+            success: function(data){
+                if (data.success){
+                    iAlert("操作成功! ");
+                    setTimeout("location.reload();", 1000);
+                }else{
+                    iAlert("操作失败! "+ data['msg']);
+                }
+            }
+        });
+    });
+
+});
+</script>
