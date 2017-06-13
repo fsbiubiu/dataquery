@@ -1,6 +1,6 @@
 部署文档
 
-1、yum 安装mysql，redis，ngin
+1、yum 安装mysql，redis，nginx
 2、yum 安装gunicorn,uwsgi,supervisor,pip
 3、使用pip 加载python需要的模块，见requirements.txt
 4、配置supervisor
