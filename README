@@ -1,0 +1,80 @@
+部署文档
+
+1、yum 安装mysql，redis，ngin
+2、yum 安装gunicorn,uwsgi,supervisor,pip
+3、使用pip 加载python需要的模块，见requirements.txt
+4、配置supervisor
+5、配置nginx，路径，端口按实际情况设置
+6、修改/opt/web/dataquery/dataquery/dataquery/settings/base.py及local.py文件，将mysql及redis的信息录入
+7、执行python manage.py makemigrations/migrate ，初始化各项表
+8、执行python manage.py createsuperuser，创建管理员
+9、启动supervisor，查看服务的状态及日志
+10、登录页面
+
+
+
+[root@django-test dataquery]# cat /etc/supervisord.d/dataquery.ini
+[program:dataquery_web]
+command=/usr/bin/python /usr/bin/gunicorn --workers=3 --bind 0.0.0.0:8087 dataquery.wsgi:application --access-logfile '-' --error-logfile '-'
+directory=/opt/web/dataquery/dataquery
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/dataquery_web.log
+loglevel=info
+
+[program:dataquery_sqlparser]
+command=java -cp .:./py4j0.10.4.jar:./druid-1.0.27-SNAPSHOT.jar:$CLASSPATH SQLParser
+directory=/opt/web/dataquery/dataquery/lib/sqlparser
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/dataquery_sqlparser.log
+loglevel=info
+
+[program:dataquery_sqldump]
+command=/usr/bin/python /opt/web/dataquery/dataquery/manage.py exec_dump_sql
+directory=/opt/web/dataquery/dataquery/
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/dataquery_sqldump.log
+loglevel=info
+
+
+
+[root@django-test dataquery]# cat /etc/nginx/conf.d/django.conf
+# mysite_nginx.conf
+
+# the upstream component nginx needs to connect to
+upstream django {
+    # server unix:///path/to/your/mysite/mysite.sock; # for a file socket
+    server 127.0.0.1:8087; # for a web port socket (we'll use this first)
+}
+
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      80;
+    # the domain name it will serve for
+    server_name dataquery.whaley.cn; # substitute your machine's IP address or FQDN
+    charset     utf-8;
+     access_log /data/logs/django.log;
+     error_log /data/logs/django.err;
+
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+
+    # Django media
+
+    location /static {
+        alias /opt/web/dataquery/dataquery/static/; # your Django project's static files - amend as required
+    }
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+      #  uwsgi_pass  django;
+       # include     /etc/nginx/uwsgi_params; # the uwsgi_params file you installed
+        proxy_pass http://127.0.0.1:8087;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+ }
+}
