@@ -11,6 +11,11 @@
 9、启动supervisor，查看服务的状态及日志
 10、登录页面
 
+遇到问题：
+    python manage.py makemigrations/migrate，报错提示Table 不存在，手动创建accounts_department表才能执行migrate操作（不过这时提供表已存在。。）
+    怀疑是forms中直接调用Department类导致的，目前通过手动创建account下的2个表暂时解决
+
+
 
 
 [root@django-test dataquery]# cat /etc/supervisord.d/dataquery.ini
